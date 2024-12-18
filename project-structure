@@ -1,0 +1,17 @@
+src/
+  ├── components/
+  │   ├── Layout/
+  │   │   ├── Header.js
+  │   │   ├── Sidebar.js
+  │   │   └── Layout.js
+  │   ├── demos/
+  │   │   ├── Hello.js
+  │   │   ├── Viewer.js
+  │   │   ├── OfficeDocument.js
+  │   │   └── ImageViewer.js
+  │   └── common/
+  │       └── DragDropArea.js
+  ├── contexts/
+  │   └── ThemeContext.js
+  ├── App.js
+  └── index.js 
