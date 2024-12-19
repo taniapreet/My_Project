@@ -1,108 +1,118 @@
-import React, { useState } from 'react';
-import { Box, Typography, Grid, Paper, styled } from '@mui/material';
-import DragDropArea from '../common/DragDropArea';
-
-const DocumentPreview = styled(Paper)(({ theme }) => ({
-  width: '100%',
-  aspectRatio: '3/4',
-  cursor: 'pointer',
-  overflow: 'hidden',
-  position: 'relative',
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
-
-const PreviewImage = styled('img')({
-  width: '100%',
-  height: '100%',
-  objectFit: 'cover',
-});
-
-const SAMPLE_DOCUMENTS = [
-  { 
-    name: 'Paper.docx', 
-    type: 'word',
-    preview: '/samples/mars.png',
-    description: 'Mars surface exploration in past, present, and future'
-  },
-  { 
-    name: 'Chart.xlsx', 
-    type: 'excel',
-    preview: '/samples/chart.png',
-    description: 'Online Sales Tracker'
-  },
-  { 
-    name: 'Slides.pptx', 
-    type: 'powerpoint',
-    preview: '/samples/slides.png',
-    description: 'Data, Sampling, and Variation in Data Sampling'
-  },
-];
+import React, { useEffect, useRef } from 'react';
+import { Box, Typography } from '@mui/material';
+import { useLocation } from 'react-router-dom';
+import PSPDFKit from 'pspdfkit';
+import DocumentDropBox from '../common/DocumentDropBox';
 
 const OfficeDocument = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
+  const containerRef = useRef(null);
+  const instanceRef = useRef(null);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const documentPath = searchParams.get('document') || 'Paper.docx';
 
-  const handleFileDrop = (files) => {
-    if (files.length > 0) {
-      setSelectedFile(files[0]);
-    }
-  };
+  useEffect(() => {
+    const container = containerRef.current;
 
-  const handleSampleClick = (document) => {
-    // Handle sample document click
-    console.log('Opening sample document:', document.name);
+    const loadDocument = async () => {
+      try {
+        console.log('Current instances:', PSPDFKit.instances);
+        
+        if (instanceRef.current) {
+          console.log('Unloading existing instance:', instanceRef.current);
+          await PSPDFKit.unload(container);
+          instanceRef.current = null;
+        }
+
+        // Try to unload any instance that might be using this container
+        try {
+          const existingInstance = PSPDFKit.instances.find(
+            instance => instance.container === container
+          );
+          if (existingInstance) {
+            console.log('Found existing instance for container:', existingInstance);
+            await PSPDFKit.unload(existingInstance.container);
+          }
+        } catch (e) {
+          console.log('Error checking existing instances:', e);
+        }
+
+        console.log('Loading new instance...');
+        const baseUrl = `${window.location.protocol}//${window.location.host}/assets/`;
+
+        await PSPDFKit.unload(container);
+
+        instanceRef.current = await PSPDFKit.load({
+          container,
+          document: documentPath,
+          baseUrl,
+          styleSheets: [`${baseUrl}pspdfkit.css`],
+        });
+        console.log('New instance loaded:', instanceRef.current);
+      } catch (error) {
+        console.error('Failed to load document:', error);
+      }
+    };
+
+    loadDocument();
+
+    // Cleanup function
+    return () => {
+      const cleanup = async () => {
+        if (instanceRef.current) {
+          await PSPDFKit.unload(container);
+          instanceRef.current = null;
+        }
+      };
+      cleanup();
+    };
+  }, [documentPath]);
+
+  const handleFileSelect = (file) => {
+    // Handle the selected file
+    console.log('File selected:', file);
+    // Add your file processing logic here
   };
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" gutterBottom>
-        Office Document
-      </Typography>
-      <Typography color="text.secondary" paragraph>
-        View Word, Excel, and PowerPoint files in your browser. Upload an MS Office file and start
-        annotating, signing, editing, searching, and more.
-      </Typography>
-      
-      <Box component="a" href="#" sx={{ color: 'primary.main', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 1, mb: 4 }}>
-        <Box component="span" sx={{ display: 'inline-flex', p: 0.5, borderRadius: 1, bgcolor: 'primary.main', color: 'white' }}>
-          ⓘ
-        </Box>
-        Read more in our guides
+    <>
+      {/* Sidebar Content */}
+      <Box sx={{ p: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          View Word, Excel, and PowerPoint files in your browser. Upload an MS Office file and
+          start annotating, signing, editing, searching, and more.
+        </Typography>
       </Box>
 
-      <Typography variant="h6" gutterBottom>
-        Try converting a document:
-      </Typography>
-      
-      <Grid container spacing={3} mb={4}>
-        {SAMPLE_DOCUMENTS.map((doc) => (
-          <Grid item xs={12} sm={4} key={doc.name}>
-            <DocumentPreview onClick={() => handleSampleClick(doc)}>
-              <PreviewImage src={doc.preview} alt={doc.name} />
-            </DocumentPreview>
-            <Typography variant="body2" mt={1}>
-              {doc.name}
-            </Typography>
-          </Grid>
-        ))}
-      </Grid>
-
-      <DragDropArea 
-        onFileDrop={handleFileDrop}
-        text="Drop your document here, or browse"
-        supportedFormats=".docx, .xlsx, .pptx"
-      />
-
-      {selectedFile && (
-        <Box mt={3}>
-          <Typography>
-            Selected file: {selectedFile.name}
-          </Typography>
-          {/* Add PSPDFKit viewer here */}
-        </Box>
-      )}
-    </Box>
+      {/* PDF Viewer */}
+      <Box 
+        sx={{ 
+          display: 'flex',
+          width: '100%',
+          height: '100%',
+          pl: 0,
+          position: 'absolute',
+          left: '240px',
+          right: 0
+        }}
+      >
+        <Box 
+          ref={containerRef} 
+          sx={{ 
+            width: '100%',
+            height: 'calc(100vh - 64px)',
+            bgcolor: 'white',
+            borderLeft: '1px solid',
+            borderColor: 'divider',
+            '& iframe': {
+              border: 'none',
+              width: '100%',
+              height: '100%'
+            }
+          }} 
+        />
+      </Box>
+    </>
   );
 };
 

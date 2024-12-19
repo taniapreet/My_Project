@@ -23,7 +23,7 @@ const PageManipulation = () => {
 
       <Box component="a" href="#" sx={{ color: 'primary.main', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 1, mb: 4 }}>
         <Box component="span" sx={{ display: 'inline-flex', p: 0.5, borderRadius: 1, bgcolor: 'primary.main', color: 'white' }}>
-          ⓘ
+          ✎
         </Box>
         Read more in our guides
       </Box>

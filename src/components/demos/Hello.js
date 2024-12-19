@@ -1,61 +1,85 @@
-import React, { useEffect, useRef } from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
+import { Box } from '@mui/material';
+import { useLocation } from 'react-router-dom';
 import PSPDFKit from 'pspdfkit';
 
 const Hello = () => {
   const containerRef = useRef(null);
   const instanceRef = useRef(null);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const documentPath = searchParams.get('document') || 'Sample.pdf';
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const container = containerRef.current;
 
-    // We need to inform PSPDFKit where to look for its library assets
-    const baseUrl = `${window.location.protocol}//${window.location.host}/assets/`;
-
-    const loadPDF = async () => {
-      // Unload any existing instance
-      if (instanceRef.current) {
-        PSPDFKit.unload(container);
-      }
-
+    const loadDocument = async () => {
       try {
+        setIsLoading(true);
+        // Make sure any existing instance is unloaded
+        if (instanceRef.current) {
+          await PSPDFKit.unload(container);
+          instanceRef.current = null;
+        }
+
+        // Only proceed if component is still mounted
+        if (!isMounted) return;
+
+        // Create absolute URL for baseUrl
+        const baseUrl = `${window.location.protocol}//${window.location.host}/assets/`;
+
+        // Load new instance
         instanceRef.current = await PSPDFKit.load({
           container,
-          document: '/TaniaCV.pdf',
-          baseUrl: baseUrl,
-          //theme: document.body.classList.contains('dark') ? 'dark' : 'light',
+          document: '/Sample.pdf',
+          baseUrl,
+          styleSheets: [`${baseUrl}pspdfkit.css`],
+          toolbarItems: PSPDFKit.defaultToolbarItems,
         });
       } catch (error) {
-        console.error('Failed to load PDF:', error);
+        console.error('Failed to load document:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    loadPDF();
+    loadDocument();
 
-    // Cleanup function
     return () => {
+      isMounted = false;
       if (instanceRef.current) {
         PSPDFKit.unload(container);
-        instanceRef.current = null;
       }
     };
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, [documentPath]);
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" gutterBottom>
-        Hello Demo
-      </Typography>
-      <Typography gutterBottom>
-        This is the basic PSPDFKit Web SDK demo showing a default PDF document.
-      </Typography>
+    <Box 
+      sx={{ 
+        display: 'flex',
+        width: '100%',
+        height: '100%',
+        pl: 0,
+        position: 'absolute',
+        left: '240px',
+        right: 0
+      }}
+    >
       <Box 
         ref={containerRef} 
         sx={{ 
-          height: 'calc(100vh - 240px)',
-          border: '1px solid',
+          width: '100%',
+          height: 'calc(100vh - 64px)',
+          bgcolor: 'white',
+          borderLeft: '1px solid',
           borderColor: 'divider',
-          borderRadius: 1,
+          '& iframe': {
+            border: 'none',
+            width: '100%',
+            height: '100%'
+          }
         }} 
       />
     </Box>

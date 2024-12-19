@@ -17,6 +17,12 @@ body {
 .sidebar {
   background-color: #ffffff;
   border-right: 1px solid #e0e0e0;
+  position: fixed;
+  left: 0;
+  top: 64px;
+  width: 240px;
+  height: calc(100vh - 64px);
+  z-index: 1;
 }
 
 .sidebar-item {
@@ -123,4 +129,104 @@ body {
   font-size: 16px;
   color: #666666;
   margin-bottom: 24px;
-} 
+}
+
+/* Logo styles */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-symbol {
+  display: grid;
+  grid-template-columns: repeat(3, 4px);
+  gap: 2px;
+  padding: 2px;
+}
+
+.logo-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Brand name styles */
+.brand-name {
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  color: #000;
+}
+
+/* Add these styles */
+.sidebar-content {
+  padding: 0;
+}
+
+.description-text {
+  color: #666;
+  padding-left: 16px;
+  margin-bottom: 16px;
+}
+
+.sample-documents {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 16px;
+}
+
+.sample-document {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sample-document img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+/* Center PDF viewer container */
+.PSPDFKit-Container {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+}
+
+/* Center the actual PDF content */
+.PSPDFKit-Document {
+  margin: 0 auto !important;
+  max-width: 850px !important;
+}
+
+/* Ensure toolbar is centered */
+.PSPDFKit-Toolbar {
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+/* Center the page container */
+.PSPDFKit-Page-Container {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+}
+
+/* Ensure page content is centered */
+.PSPDFKit-Page {
+  margin: 0 auto !important;
+}
+
+/* Ensure main content fills space without gaps */
+.main-content {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+  

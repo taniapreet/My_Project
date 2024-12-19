@@ -1,10 +1,10 @@
 import React, { useRef } from 'react';
 import { Box, Typography, Grid, Paper, styled } from '@mui/material';
-import { Article as ContentEditorIcon, ViewQuilt as PageManipulationIcon, Crop as CropToolIcon } from '@mui/icons-material';
+import { AddPhotoAlternate, LocalOffer, Draw, Straighten } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PSPDFKit from 'pspdfkit';
 
-const EditorOption = styled(Paper)(({ theme }) => ({
+const AnnotationOption = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   textAlign: 'center',
   cursor: 'pointer',
@@ -13,7 +13,20 @@ const EditorOption = styled(Paper)(({ theme }) => ({
   },
 }));
 
-const Editor = () => {
+const loadPSPDFKit = async (container, document) => {
+  try {
+    return await PSPDFKit.load({
+      container,
+      document,
+      baseUrl: '/assets/pspdfkit-lib/',
+      styleSheets: ['/assets/pspdfkit-lib/pspdfkit.css'],
+    });
+  } catch (error) {
+    console.error('Failed to load PSPDFKit:', error);
+  }
+};
+
+const Annotations = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -23,22 +36,28 @@ const Editor = () => {
 
   const options = [
     {
-      title: 'Content Editor',
-      description: 'Quickly edit, resize, and move text boxes in your PDF with our content editor.',
-      icon: <ContentEditorIcon sx={{ fontSize: 48 }} />,
-      path: '/editor/content'
+      title: 'Add an Image',
+      description: 'Upload an image to your PDF as an annotation. Resize the image, change opacity, and drag it to place it where you want it.',
+      icon: <AddPhotoAlternate sx={{ fontSize: 48 }} />,
+      path: '/annotations/add-image'
     },
     {
-      title: 'Page Manipulation',
-      description: 'Drag, drop, and reorder pages in a document. Select a page to delete, duplicate, or rotate.',
-      icon: <PageManipulationIcon sx={{ fontSize: 48 }} />,
-      path: '/editor/page'
+      title: 'Stamp',
+      description: 'Add predefined stamps or create custom stamps for your documents.',
+      icon: <LocalOffer sx={{ fontSize: 48 }} />,
+      path: '/annotations/stamp'
     },
     {
-      title: 'Crop Tool',
-      description: 'Select the cropping tool and drag a rectangle around the area you want to crop.',
-      icon: <CropToolIcon sx={{ fontSize: 48 }} />,
-      path: '/editor/crop'
+      title: 'Annotate on Image',
+      description: 'Draw, highlight, and add text annotations directly on images.',
+      icon: <Draw sx={{ fontSize: 48 }} />,
+      path: '/annotations/annotate-image'
+    },
+    {
+      title: 'Measurement Tools',
+      description: 'Measure distances, areas, and angles in your documents.',
+      icon: <Straighten sx={{ fontSize: 48 }} />,
+      path: '/annotations/measurement'
     }
   ];
 
@@ -71,11 +90,11 @@ const Editor = () => {
       />
       <Box p={3}>
         <Typography variant="h4" gutterBottom>
-          Editor
+          Annotations
         </Typography>
         <Typography gutterBottom color="text.secondary">
-          Quickly deploy PDF editing features in your application. Edit PDF text and manipulate pages
-          directly in the browser: add, merge, rotate, reorder, and delete document pages.
+          A plug-and-play PDF annotation library with more than 15 tools that lets you highlight, draw, and add
+          shapes, texts, notes, comments, and more.
         </Typography>
         
         <Box component="a" href="#" sx={{ color: 'primary.main', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 1, mb: 4 }}>
@@ -87,8 +106,8 @@ const Editor = () => {
 
         <Grid container spacing={3}>
           {options.map((option) => (
-            <Grid item xs={12} md={4} key={option.title}>
-              <EditorOption onClick={() => navigate(option.path)}>
+            <Grid item xs={12} md={6} key={option.title}>
+              <AnnotationOption onClick={() => navigate(option.path)}>
                 {option.icon}
                 <Typography variant="h6" mt={2}>
                   {option.title}
@@ -96,7 +115,7 @@ const Editor = () => {
                 <Typography color="text.secondary">
                   {option.description}
                 </Typography>
-              </EditorOption>
+              </AnnotationOption>
             </Grid>
           ))}
         </Grid>
@@ -105,4 +124,4 @@ const Editor = () => {
   );
 };
 
-export default Editor; 
+export default Annotations; 
