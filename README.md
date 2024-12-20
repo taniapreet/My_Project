@@ -36,8 +36,8 @@ A modern React-based document viewer application that supports multiple file for
 
 ## 🔧 Installation
 
-1. Clone the repository
-2. Open the Terminal
-3. Navigate to the Project Directory
-4. Install all the required dependencies using npm (Use : npm install)
-5. Start the React development server (Use : npm start)
+1. Clone the repository to your local machine.
+2. Launch your terminal.
+3. Navigate to the project directory using the cd command.
+4. Install the necessary dependencies by running npm install.
+5. Start the React development server by executing npm start.
